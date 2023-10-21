@@ -24,7 +24,6 @@
     const { sub, userDataForChat } = storeToRefs(userStore);
 
     const createNewChat = (user) => {
-        console.log("create new chat clicked");
         userDataForChat.value = [];
         userDataForChat.value.push({
             id: '',

@@ -72,7 +72,6 @@ export const useUserStore = defineStore('counter', {
     },
     async getChatById(id) {
       onSnapshot(doc(db, "chat", id), doc => {
-        console.log({ id, doc: doc.data() });
         let res = [];
         res.push(doc.data());
         this.currentChat = res;
