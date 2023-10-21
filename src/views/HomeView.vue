@@ -2,7 +2,7 @@
     <div class="flex">
         <div id="Header" class="fixed w-[420px] z-10">
             <div class="bg-[#F0F0F0] w-full flex justify-between items-center px-3 py-2">
-                <img class="rounded-full ml-1 w-10" src="https://random.imagecdn.app/100/100" alt="" />
+                <img class="rounded-full ml-1 w-10" :src="userStore.picture" alt="" />
                 <div class="flex items-center justify-cneter">
                     <AccountGroupIcon fillColor="#515151" class="mr-6" />   
                     <DotsVerticalIcon fillColor="#515151" @click="logout" class="cursor-pointer" />   
@@ -12,6 +12,7 @@
                 <div class="px-1 m-2 bg-[#F0F0F0] flex items-center justify-center rounded-mds">
                     <MagnifyIcon fillColor="#515151" class="cursor-pointer" />
                     <input
+                        @click="showFindFriends = !showFindFriends"
                         class="ml-5 appearance-none w-full bg-[#F0F0F0] py-1.5 px-2.5 text-gray-700
                         leading-right focus:outline-none focus:shadw-outline
                         placeholder:text-sm placeholder:text-gray-500"
@@ -21,13 +22,13 @@
                 </div>
             </div>
         </div>
-        <div v-if="showFindFriends">
+        <div v-if="!userStore.showFindFriends">
             <ChatsView class="mt-[100px]" />
         </div>
         <div v-else>
             <FindFriendsView class="pt-28" />
         </div>
-        <div v-if="open">
+        <div v-if="userDataForChat.length">
             <MessageView />
         </div>
         <div v-else>
@@ -52,7 +53,8 @@
     import AccountGroupIcon from 'vue-material-design-icons/AccountGroup.vue'
     import DotsVerticalIcon from 'vue-material-design-icons/DotsVertical.vue'
     import MagnifyIcon from 'vue-material-design-icons/Magnify.vue'
-    import { ref } from 'vue'
+    import { ref, onMounted } from 'vue'
+    import { storeToRefs } from 'pinia'
     import { useRouter } from 'vue-router'
     import { useUserStore } from '@/store/user-store'
 
@@ -62,9 +64,14 @@
     
     const userStore = useUserStore();
     const router = useRouter();
+    const { showFindFriends, userDataForChat } = storeToRefs(userStore);
 
-    let open = ref(true);
-    let showFindFriends = ref(false);
+    onMounted(async() => {
+        try {
+            userStore.getAllUsers();
+            await userStore.getAllChatsByUser();
+        } catch(err) {console.log(err)}
+    });
 
     const logout = () => {
         let res = confirm('Are you sure you want to logout?');

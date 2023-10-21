@@ -25,7 +25,7 @@
     const router = useRouter();
 
     const handleLoginSuccess = async (response) => {
-        await userStore.getUserDetailsFromGoogle(response.data);
+        await userStore.getUserDetailsFromGoogle(response.credential);
         setTimeout(() => {router.push('/')}, 200);
     }
 
