@@ -18,10 +18,13 @@
     </div>
 </template>
 <script setup>
+    import { computed, ref } from 'vue'
     import { storeToRefs } from 'pinia'
     import { useUserStore } from '@/store/user-store'
+    
     const userStore = useUserStore();
-    const { sub, userDataForChat } = storeToRefs(userStore);
+    const { sub, userDataForChat, allUsers } = storeToRefs(userStore);
+    let users = ref([]);
 
     const createNewChat = (user) => {
         userDataForChat.value = [];
@@ -33,5 +36,13 @@
             picture: user.picture
         });
     }
+
+    const usersComputed = computed(() => {
+        allUsers.value.forEach(user => users.value.push(user));
+        removeUsersFromFindFrinds.value.forEach(remove => {
+            let index = users.alue.findIndex(user => user.sub === remove);
+            users.value.splice(index, 1);
+        });
+    });
 </script>
 <style lang="scss" scoped></style>
