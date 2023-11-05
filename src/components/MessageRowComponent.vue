@@ -10,7 +10,7 @@
         <div class="flex items-center">
           <CheckAllIcon :fillColor="tickColor(chat)" :size="18" class="mr-1" />
           <div class="text-[15px] w-full text-gray-500 flex items-center justify-between">
-            {{ lastChatMessage(chat.messages) }}
+            {{ lastChatMessage(chat.messages) }}...
           </div>
         </div>
       </div>

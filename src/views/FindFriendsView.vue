@@ -1,6 +1,6 @@
 <template>
     <div id="FindFriends" class="pt-[100px] overflow-auto fixed h-[100vh] w-full">
-        <div v-for="user in userStore.allUsers" :key="user.sub">
+        <div v-for="user in usersComputed" :key="user.sub">
             <div v-if="user.sub !== userStore.sub" @click="createNewChat(user)" class="flex w-full p-4 items-center cursor-pointer">
                 <img class="rounded-full mr-4 w-12" :src="user.picture || ''" alt="" />
                 <div class="w-full">
@@ -23,7 +23,7 @@
     import { useUserStore } from '@/store/user-store'
     
     const userStore = useUserStore();
-    const { sub, userDataForChat, allUsers } = storeToRefs(userStore);
+    const { sub, userDataForChat, allUsers, removeUsersFromFindFriends } = storeToRefs(userStore);
     let users = ref([]);
 
     const createNewChat = (user) => {
@@ -39,10 +39,11 @@
 
     const usersComputed = computed(() => {
         allUsers.value.forEach(user => users.value.push(user));
-        removeUsersFromFindFrinds.value.forEach(remove => {
-            let index = users.alue.findIndex(user => user.sub === remove);
+        removeUsersFromFindFriends.value.forEach(remove => {
+            let index = users.value.findIndex(user => user.sub === remove);
             users.value.splice(index, 1);
         });
+        return users.value;
     });
 </script>
 <style lang="scss" scoped></style>
