@@ -71,11 +71,22 @@ export const useUserStore = defineStore('counter', {
       }
     },
     async getChatById(id) {
-      onSnapshot(doc(db, "chat", id), doc => {
-        let res = [];
-        res.push(doc.data());
-        this.currentChat = res;
-      });
+      if(id) {
+        onSnapshot(doc(db, "chat", id), doc => {
+          let res = [];
+          res.push(doc.data());
+          this.currentChat = res;
+        });
+      } else {
+        const { sub1, sub2 } = this.userDataForChat;
+        this.currentChat = [{
+          messages: [],
+          sub1,
+          sub1HasViewed: true,
+          sub2,
+          sub2HasViewed: false
+        }];
+      }
     },
     async getAllChatsByUser() {
       const q = query(collection(db, 'chat'));
@@ -95,33 +106,15 @@ export const useUserStore = defineStore('counter', {
           if(doc.data().sub2 === this.sub) chatArray.push(data);
 
           this.removeUsersFromFindFriends = [];
-
+          
           chatArray.forEach(chat => {
-            // messages send by us to the friend
-            if(this.sub === chat.sub1) {
-              this.allUsers.forEach(user => {
-                if(user.sub == chat.sub2) {
-                  chat.user === user;
-                  this.removeUsersFromFindFriends.push(user.sub);
-                }
-              });
-            }
-
-            // Messages sent by frind to us
-            if(this.sub === chat.sub2) {
-              this.allUsers.forEach(user => {
-                if(user.sub === chat.sub1) {
-                  chat.user = user;
-                  this.removeUsersFromFindFriends.push(user.sub);
-                }
-              });
-            }
+            const subToGetFriendData = this.sub === chat.sub1 ? chat.sub2 : chat.sub1;
+            const friendData = this.allUsers.find(user => user.sub === subToGetFriendData);
+            chat.user = friendData;
+            this.removeUsersFromFindFriends.push(subToGetFriendData); 
           });
 
-          this.chats = [];
-          chatArray.forEach(chat => {
-            this.chats.push(chat);
-          });
+          this.chats = [...chatArray];
         });
       });
     },
@@ -155,6 +148,12 @@ export const useUserStore = defineStore('counter', {
         }
       } catch (e) {console.log(e)}
     },
+    async hasReadMessage(data) {
+      await updateDoc(doc(db, `chat/${data.id}`), {
+        [data.key1]: data.val1,
+        [data.key2]: data.val2
+      }, { merge: true });
+    },
     logout() {
       this.sub = '';
       this.email = '';
@@ -162,8 +161,11 @@ export const useUserStore = defineStore('counter', {
       this.firstName = '';
       this.lastName = '';
       this.allUsers = [];
+      this.chats = [];
       this.userDataForChat = [];
+      this.removeUsersFromFindFriends = [];
       this.showFindFriends = false;
+      this.currentChat = null;
     }
   },
   persist: true

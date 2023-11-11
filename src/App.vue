@@ -10,6 +10,8 @@
   const router = useRouter();
 
   onMounted(() => {
-    if(!userStore.sub) router.push('/login');
+    try {
+      if(!userStore.sub) router.push('/login');
+    } catch(e) {console.log(e)}
   });
 </script>

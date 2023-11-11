@@ -21,6 +21,8 @@
     import { computed, ref } from 'vue'
     import { storeToRefs } from 'pinia'
     import { useUserStore } from '@/store/user-store'
+
+    const emit = defineEmits(["onSelectChat"]);
     
     const userStore = useUserStore();
     const { sub, userDataForChat, allUsers, removeUsersFromFindFriends } = storeToRefs(userStore);
@@ -35,6 +37,7 @@
             firstName: user.firstName,
             picture: user.picture
         });
+        emit("onSelectChat");
     }
 
     const usersComputed = computed(() => {

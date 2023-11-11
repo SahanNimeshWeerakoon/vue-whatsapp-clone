@@ -1,7 +1,7 @@
 <template>
     <div id="Messages" class="pt-1 z-0 overflow-auto fixed h-[calc(100vh-100px)] w-[420px]">
         <div v-for="chat in chats" :key="chat">
-            <div v-if="sub !== chat.sub1" @click="openChat(chat)">
+            <div @click="openChat(chat)">
                 <MessageRowComponent :chat="chat" />
             </div>
         </div>
@@ -17,9 +17,11 @@
     const { sub, chats, userDataForChat } = storeToRefs(userStore);
 
     onMounted(async() => {
-        if(userDataForChat.value.length) {
-            await userStore.getChatById(userDataForChat.value[0].id);
-        }
+        try {
+            if(userDataForChat.value && userDataForChat.value.length) {
+                await userStore.getChatById(userDataForChat.value[0].id);
+            }
+        } catch(e) {console.log(e)}
     });
 
     const openChat = async (chat) => {
@@ -33,6 +35,19 @@
         });
         try {
             await userStore.getChatById(chat.id);
+            let data = {
+                id: chat.id,
+                key1: 'sub1HasViewed',
+                val1: false,
+                key2: 'sub2HasViewed',
+                val2: false,
+
+            }
+            if(chat.sub1 === sub.value || chat.sub2 === sub.value) {
+                data.val1 = true;
+                data.val2 = true;
+            }
+            await userStore.hasReadMessage(data);
         } catch(e) {console.log(e)}
     }
 </script>

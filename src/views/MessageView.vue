@@ -15,7 +15,7 @@
                 <div v-if="currentChat && currentChat.length" class="px-20 text-sm">
                     <div v-for="msg in currentChat[0].messages" :key="msg">
                         <!-- message sent by me to friend -->
-                        <div v-if="msg.sub === sub" class="flex w-[calc(100%-50px)]">
+                        <div v-if="msg.sub !== sub" class="flex w-[calc(100%-50px)]">
                             <div class="inline-block bg-white p-2 rounded-md my-1">
                                 {{ msg.message }}
                             </div>
@@ -40,7 +40,7 @@
                         type="text"
                         autocomplete="off"
                         placeholder="Message" />
-                    <button class="ml-3 p-2 w-12 flex items-center justify-center" @click="sendMessage">
+                    <button :disabled="disableBtn" class="ml-3 p-2 w-12 flex items-center justify-center" @click="sendMessage">
                         <SendIcon fillColor="#515151" />
                     </button>
                 </div>
@@ -53,21 +53,56 @@
     import EmoticonExcitedOutlineIcon from 'vue-material-design-icons/EmoticonExcitedOutline.vue'
     import PaperclipIcon from 'vue-material-design-icons/Paperclip.vue'
     import SendIcon from 'vue-material-design-icons/Send.vue'
-    import { ref } from 'vue';
+    import { ref, watch } from 'vue';
     import { useUserStore } from '@/store/user-store'
     import { storeToRefs } from 'pinia'
 
     const userStore = useUserStore();
     const { userDataForChat, currentChat, sub } = storeToRefs(userStore);
+    
     let message = ref('');
+    let disableBtn = ref(false);
 
     const sendMessage = async () => {
+        if(!message.value) return;
+        disableBtn.value = true;
+        let userData = userDataForChat.value[0];
         await userStore.sendMessage({
             message: message.value,
-            sub2: userDataForChat.value[0].sub2,
-            chatId: userDataForChat.value[0].id
+            sub2: userData.sub2,
+            chatId: userData.id
         });
+        let data = {
+            id: userData.id,
+            key1: 'sub1HasViewed',
+            val1: false,
+            key2: 'sub2HasViewed',
+            val2: false,
+
+        }
+        if(userData.sub1 === sub.value) {
+            data.val1 = true;
+            data.val2 = false;
+        } else if(userData.sub2 === sub.value) {
+            data.val1 = false;
+            data.val2 = true;
+        }
+        await userStore.hasReadMessage(data);
+        disableBtn.value = false;
+        message.value = '';
+
+        let objDiv = document.getElementById("MessagesSection");
+        objDiv.scrollTop = objDiv.scrollHeight;
     }
+
+    watch(() => currentChat.value, (chat) => {
+        if(chat.length) {
+            setTimeout(() => {
+                let objDiv = document.getElementById("MessagesSection");
+                objDiv.scrollTop = objDiv.scrollHeight;
+            }, 500);
+        }
+    }, { deep: true });
 </script>
 <style lang="scss">
     #BG {

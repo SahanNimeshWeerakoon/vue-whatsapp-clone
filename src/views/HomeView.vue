@@ -12,7 +12,8 @@
                 <div class="px-1 m-2 bg-[#F0F0F0] flex items-center justify-center rounded-mds">
                     <MagnifyIcon fillColor="#515151" class="cursor-pointer" />
                     <input
-                        @click="showFindFriends = !showFindFriends"
+                        @focus="showFindFriends = true"
+                        @blur="hideFindFriends()"
                         class="ml-5 appearance-none w-full bg-[#F0F0F0] py-1.5 px-2.5 text-gray-700
                         leading-right focus:outline-none focus:shadw-outline
                         placeholder:text-sm placeholder:text-gray-500"
@@ -22,11 +23,11 @@
                 </div>
             </div>
         </div>
-        <div v-if="!userStore.showFindFriends">
+        <div v-if="!showFindFriends">
             <ChatsView class="mt-[100px]" />
         </div>
         <div v-else>
-            <FindFriendsView class="pt-28" />
+            <FindFriendsView class="pt-28" @onSelectChat="showFindFriends = false" />
         </div>
         <div v-if="userDataForChat.length">
             <MessageView />
@@ -72,6 +73,12 @@
             await userStore.getAllChatsByUser();
         } catch(err) {console.log(err)}
     });
+
+    const hideFindFriends = () => {
+        setTimeout(() => {
+            showFindFriends.value = false
+        }, 50);
+    }
 
     const logout = () => {
         let res = confirm('Are you sure you want to logout?');
